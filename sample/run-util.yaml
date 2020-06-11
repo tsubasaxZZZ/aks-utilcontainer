@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: nginx
-  name: nginx
+    app: util
+  name: util
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app: util
   template:
     metadata:
       labels:
-        app: nginx
+        app: util
     spec:
       initContainers:
         - image: tsubasaxzzz/util-container
@@ -24,7 +24,7 @@ spec:
               name: html-volume
       containers:
         - image: tsubasaxzzz/util-container
-          name: util-container
+          name: util
           volumeMounts:
             - mountPath: /usr/share/nginx/html
               name: html-volume
