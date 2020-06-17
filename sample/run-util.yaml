@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: util
-  name: util
+    app: testpod
+  name: testpod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: util
+      app: testpod
   template:
     metadata:
       labels:
-        app: util
+        app: testpod
     spec:
       initContainers:
         - image: tsubasaxzzz/util-container
@@ -25,10 +25,39 @@ spec:
       containers:
         - image: tsubasaxzzz/util-container
           name: util
+          resources:
+            requests:
+              cpu: 100m
           volumeMounts:
             - mountPath: /usr/share/nginx/html
               name: html-volume
-      terminationGracePeriodSeconds: 180
+          livenessProbe :
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - test ! -e /purge.dat
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe :
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - test ! -e /purge.dat
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash","-c", "touch /purge.dat;sleep 50;nginx -s quit"]
+      terminationGracePeriodSeconds: 60
       volumes:
         - name: html-volume
           emptyDir: {}
